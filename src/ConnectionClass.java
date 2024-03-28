@@ -21,5 +21,15 @@ public class ConnectionClass {
 		return conn;
 	
 	}
+	public static void closeOpenConnection()
+	{
+		if(conn!=null)
+			try {
+				conn.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	}
 
 }
