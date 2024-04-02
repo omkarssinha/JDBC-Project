@@ -1,4 +1,6 @@
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 public class MainClass {
 
 	public static void main(String[] args) {
@@ -62,8 +64,9 @@ public class MainClass {
 
 	}
 	
-	public static void create(int ISBN, String title, String year, String author)
+	public static int create(int ISBN, String title, String year, String author)
 	{
+		int res=0;
 		try {
 			Connection conn = ConnectionClass.connect();
 			String addBookQuery = "insert into library(ISBN, Title, Year_of_publication, Author) values(?,?,?,?)";						
@@ -82,7 +85,7 @@ public class MainClass {
 			pstmt.setString(3, year);
 			pstmt.setString(4, author);
 			
-			pstmt.executeUpdate();
+			res = pstmt.executeUpdate();
 			
 //			System.out.println("Done.. \nEnter more books? (Y/N)");
 //			if(br.readLine().equals("Y"))
@@ -90,11 +93,12 @@ public class MainClass {
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
+		return res;
 	}
 	
 	public static String[] retrieve(int isbn)
 	{
-		String[] vals = new String[3];
+		String[] vals = new String[4];
 		try {
 			Connection conn = ConnectionClass.connect();
 			String selectBookQuery = "select * from library where ISBN=?";
@@ -107,9 +111,10 @@ public class MainClass {
 			
 			ResultSet set = pstmt3.executeQuery();
 			while(set.next()) {
-				vals[0] = set.getString(2);
-				vals[1] = set.getString(3);
-				vals[2] = set.getString(4);
+				vals[0] = set.getString(1);
+				vals[1] = set.getString(2);
+				vals[2] = set.getString(3);
+				vals[3] = set.getString(4);
 //				System.out.println("The required details are: ");
 //				System.out.println(isbn+" "+title+" "+year+" "+author);
 			}
@@ -122,12 +127,45 @@ public class MainClass {
 		}
 		return vals;
 	}
-	
-	public static void update(int isbn, int newIsbn, String newTitle, String newYear, String newAuthor)
+	public static List<String[]> retrieve()
 	{
+		List<String[]> resSet = new ArrayList<String[]>();
+		try {
+			
+			Connection conn = ConnectionClass.connect();
+			String selectBookQuery = "select * from library";
+			
+			PreparedStatement pstmt3 = conn.prepareStatement(selectBookQuery);
+//			System.out.println("Enter book ISBN to select book  ");
+//			int isbn = Integer.parseInt(br.readLine());
+			
+			ResultSet set = pstmt3.executeQuery();
+			while(set.next()) {
+				String[] vals = new String[4];
+				vals[0] = set.getString(1);
+				vals[1] = set.getString(2);
+				vals[2] = set.getString(3);
+				vals[3] = set.getString(4);
+				resSet.add(vals);
+//				System.out.println("The required details are: ");
+//				System.out.println(isbn+" "+title+" "+year+" "+author);
+			}
+			
+//			System.out.println("Do you want to retrieve and view more books?(Y/N)");
+//			if(br.readLine().equals("Y"))
+//				retrieve(br, conn);
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		return resSet;
+	}
+	
+	public static int update(int isbn, String newTitle, String newYear, String newAuthor)
+	{
+		int res = 0;
 		try {
 			Connection conn = ConnectionClass.connect();
-			String updateBookQuery = "update library set ISBN=?, Title=?, Year_of_publication=?, Author=? where ISBN=?";		
+			String updateBookQuery = "update library set Title=?, Year_of_publication=?, Author=? where ISBN=?";		
 			
 			PreparedStatement pstmt1 = conn.prepareStatement(updateBookQuery);
 //			System.out.println("Identify book to change with its current ISBN ");
@@ -141,23 +179,24 @@ public class MainClass {
 //			System.out.println("Enter author name to change  ");
 //			String newAuthor = br.readLine();
 			
-			pstmt1.setInt(1, newIsbn);
-			pstmt1.setString(2, newTitle);
-			pstmt1.setString(3, newYear);
-			pstmt1.setString(4, newAuthor);
-			pstmt1.setInt(5, isbn);
+			pstmt1.setString(1, newTitle);
+			pstmt1.setString(2, newYear);
+			pstmt1.setString(3, newAuthor);
+			pstmt1.setInt(4, isbn);
 			
-			pstmt1.executeUpdate();
+			res = pstmt1.executeUpdate();
 //			System.out.println("Done... \nDo want to update more?(Y/N)");
 //			if(br.readLine().equals("Y"))
 //				update(br, conn);
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
+		return res;
 	}
 	
-	public static void delete(int isbn)
+	public static int delete(int isbn)
 	{
+		int res = 0;
 		try {
 			Connection conn = ConnectionClass.connect();
 			String deleteBookQuery = "delete from library where ISBN=?";		
@@ -167,14 +206,14 @@ public class MainClass {
 //			int isbn = Integer.parseInt(br.readLine());
 			
 			pstmt2.setInt(1, isbn);
-			
-			pstmt2.executeUpdate();
+			res = pstmt2.executeUpdate();
 //			System.out.println("Done... \nDo you delete more?(Y/N)");
 //			if(br.readLine().equals("Y"))
 //				delete(br, conn);
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
+		return res;
 	}
 
 }
